@@ -62,6 +62,15 @@ public:
         return ms_appcastURL;
     }
 
+    /// Return Application ID
+    static std::string GetAppId()
+    {
+        CriticalSectionLocker lock(ms_csVars);
+        if ( ms_appId.empty() )
+            ms_appId = GetCustomResource("FeedAppId", "APPID");
+        return ms_appId;
+    }
+
     /// Return application name
     static std::wstring GetAppName()
     {
@@ -211,6 +220,7 @@ private:
     static CriticalSection ms_csVars;
 
     static std::string  ms_appcastURL;
+	static std::string	ms_appId;
     static std::string  ms_registryPath;
     static std::wstring ms_companyName;
     static std::wstring ms_appName;

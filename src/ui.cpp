@@ -53,6 +53,8 @@
 #include <exdisp.h>
 #include <mshtml.h>
 
+#include "unzip.h"
+#include "download.h"
 
 #if !wxCHECK_VERSION(2,9,0)
 #error "wxWidgets >= 2.9 is required to compile this code"
@@ -225,6 +227,8 @@ public:
     void StateUpdateError();
     // change state into "a new version is available"
     void StateUpdateAvailable(const Appcast& info);
+	
+	void OnUpdateApp();
 
 private:
     void EnablePulsing(bool enable);
@@ -238,6 +242,14 @@ private:
 
     void SetMessage(const wxString& text, int width = MESSAGE_AREA_WIDTH);
     void ShowReleaseNotes(const Appcast& info);
+
+	// private function to do download/stop application/extraction/
+	bool DownloadZipFromFeedUrl();
+
+	void CloseAppFromFeedAppId();
+
+	void UpdateApp();
+
 
 private:
     wxTimer       m_timer;
@@ -386,13 +398,157 @@ void UpdateDialog::OnRemindLater(wxCommandEvent&)
     Close();
 }
 
+bool UpdateDialog::DownloadZipFromFeedUrl()
+{
+	std::string baseUrl("http://localhost:47688/updates/win32/");
+
+	StringDownloadSink downloadZip;
+	DownloadFile(m_appcast.DownloadURL, &downloadZip, 1);
+
+	std::string downloadFilename = m_appcast.DownloadURL.substr(baseUrl.length(), m_appcast.DownloadURL.length() - baseUrl.length());
+
+	FILE * pFile;
+	fopen_s ( &pFile, downloadFilename.c_str() , "wb" );
+
+	size_t size_write = fwrite(downloadZip.data.c_str(), 1, downloadZip.data.size(), pFile);
+	fclose(pFile);
+
+	return true;
+}
+
+void UpdateDialog::CloseAppFromFeedAppId()
+{
+    const std::string appId = Settings::GetAppId();
+    
+	if ( appId.empty() )
+        throw std::runtime_error("App ID not specified.");
+
+	int nLen = strlen(appId.c_str()) + 1; 
+    int nwLen = MultiByteToWideChar(CP_ACP, 0, appId.c_str(), nLen, NULL, 0);
+
+	TCHAR lpszFile[256]; 
+    MultiByteToWideChar(CP_ACP, 0, appId.c_str(), nLen, lpszFile, nwLen); 
+
+	HWND qWin = ::FindWindow( lpszFile, 0);
+	UINT uMessage = WM_CLOSE;
+	WPARAM wParam = 0;
+	LPARAM lParam = 0;
+
+	SendMessage( qWin, uMessage, wParam, lParam );
+}
+
+std::wstring GetExecutablePath()
+{
+	static TCHAR buffer[MAX_PATH];
+	DWORD res = GetModuleFileName(NULL, buffer, MAX_PATH-1);
+
+	std::wstring str(buffer);
+	size_t pos = str.find_last_of('\\');
+
+	if (pos != std::string::npos)
+	{
+		return str.substr(0, pos);
+	}
+	else
+	{
+		return str;
+	}
+}
+
+void UpdateDialog::UpdateApp()
+{
+	int ret = 0;
+	std::string baseUrl("http://localhost:47688/updates/win32/");
+	std::string downloadFilename = m_appcast.DownloadURL.substr(baseUrl.length(), m_appcast.DownloadURL.length() - baseUrl.length());
+
+	unzFile zip = unzOpen( downloadFilename.c_str() );
+
+	if ( zip == NULL ) 
+	{
+		printf("Error opening unzOpen\n");
+		return;
+	}
+
+	std::string exeuteFilename;
+
+	ret = unzGoToFirstFile(zip);
+
+	while( ret == UNZ_OK )
+	{
+		unz_file_info FileInfo;   
+		char *szName=NULL;   
+		memset(&FileInfo,0,sizeof(FileInfo));   
+	   
+		int nRet=unzGetCurrentFileInfo(zip,&FileInfo,NULL,0,NULL,0,NULL,0); 
+		if (nRet!=UNZ_OK) continue;   
+	   
+		// Allocate space for the filename    
+		szName=(char *)malloc(FileInfo.size_filename+1); if (szName==NULL) continue;   
+		nRet=unzGetCurrentFileInfo(zip,&FileInfo,szName,FileInfo.size_filename+1,NULL,0,NULL,0);   
+
+		FILE * file;
+		fopen_s ( &file, szName , "wb" );
+
+		nRet=unzOpenCurrentFile(zip); 
+		if (nRet!=UNZ_OK) return;   
+
+		unsigned int len = FileInfo.uncompressed_size;
+		char* buf = NULL;
+		buf=(char *)malloc(len);
+
+		nRet=unzReadCurrentFile(zip, buf, len);   
+
+		fwrite(buf, 1, len, file);
+		fclose(file);
+
+		ret = unzGoToNextFile(zip);
+
+		exeuteFilename = szName;
+
+		delete szName;
+		szName = NULL;
+
+		delete buf;
+		buf = NULL;
+	}
+
+	unzClose(zip);
+
+	int nLen = strlen(exeuteFilename.c_str()) + 1; 
+    int nwLen = MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, NULL, 0);
+
+	TCHAR lpszFile[256]; 
+    MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, lpszFile, nwLen); 
+
+	TCHAR path[MAX_PATH] = {0};
+
+	wsprintf(path, L"%s\\%s", GetExecutablePath().c_str(), lpszFile);
+	//wsprintf(path, L"%s\\QVIVO_2.0.31.exe", GetExecutablePath().c_str());
+
+	HANDLE handle = ShellExecute(NULL, _T("open"), path, NULL, NULL, SW_SHOWNORMAL);
+}
+
+void UpdateDialog::OnUpdateApp()
+{
+	if(DownloadZipFromFeedUrl())
+	{
+		CloseAppFromFeedAppId();
+
+		UpdateApp();
+
+		Close();
+	}
+}
 
 void UpdateDialog::OnInstall(wxCommandEvent&)
 {
     // FIXME: download the file within WinSparkle UI, stop the app,
     // elevate privileges, launch the installer
-    wxLaunchDefaultBrowser(m_appcast.DownloadURL);
-    Close();
+    //wxLaunchDefaultBrowser(m_appcast.DownloadURL);
+    //Close();
+
+	UI::ShowCheckingUpdates();
+	UI::UpdateApp();
 }
 
 
@@ -683,6 +839,9 @@ const int MSG_UPDATE_AVAILABLE = wxNewId();
 // Notify the UI that a new version is available
 const int MSG_UPDATE_ERROR = wxNewId();
 
+// Notify the UI that a new version is available
+const int MSG_UPDATE_APP = wxNewId();
+
 // Tell the UI to ask for permission to check updates
 const int MSG_ASK_FOR_PERMISSION = wxNewId();
 
@@ -709,6 +868,7 @@ private:
     void OnNoUpdateFound(wxThreadEvent& event);
     void OnUpdateAvailable(wxThreadEvent& event);
     void OnUpdateError(wxThreadEvent& event);
+	void OnUpdateApp(wxThreadEvent& event);
     void OnAskForPermission(wxThreadEvent& event);
 
 private:
@@ -742,6 +902,7 @@ App::App()
     Bind(wxEVT_COMMAND_THREAD, &App::OnNoUpdateFound, this, MSG_NO_UPDATE_FOUND);
     Bind(wxEVT_COMMAND_THREAD, &App::OnUpdateAvailable, this, MSG_UPDATE_AVAILABLE);
     Bind(wxEVT_COMMAND_THREAD, &App::OnUpdateError, this, MSG_UPDATE_ERROR);
+	Bind(wxEVT_COMMAND_THREAD, &App::OnUpdateApp, this, MSG_UPDATE_APP);
     Bind(wxEVT_COMMAND_THREAD, &App::OnAskForPermission, this, MSG_ASK_FOR_PERMISSION);
 }
 
@@ -811,6 +972,11 @@ void App::OnUpdateError(wxThreadEvent&)
         m_win->StateUpdateError();
 }
 
+void App::OnUpdateApp(wxThreadEvent&)
+{
+    InitWindow();
+    m_win->OnUpdateApp();
+}
 
 void App::OnUpdateAvailable(wxThreadEvent& event)
 {
@@ -988,6 +1154,16 @@ void UI::AskForPermission()
 {
     UIThreadAccess uit;
     uit.App().SendMsg(MSG_ASK_FOR_PERMISSION);
+}
+
+void UI::UpdateApp()
+{
+    UIThreadAccess uit;
+
+    if ( !uit.IsRunning() )
+        return;
+
+    uit.App().SendMsg(MSG_UPDATE_APP);
 }
 
 } // namespace winsparkle

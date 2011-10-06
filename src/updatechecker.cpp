@@ -244,7 +244,7 @@ void UpdateChecker::Run()
         if ( CompareVersions(currentVersion, appcast.Version) >= 0 )
         {
             // The same or newer version is already installed.
-            UI::NotifyNoUpdates();
+            //UI::NotifyNoUpdates();
             return;
         }
 
@@ -253,7 +253,7 @@ void UpdateChecker::Run()
         if ( Settings::ReadConfigValue("SkipThisVersion", toSkip) &&
              toSkip == appcast.Version )
         {
-            UI::NotifyNoUpdates();
+            //UI::NotifyNoUpdates();
             return;
         }
 

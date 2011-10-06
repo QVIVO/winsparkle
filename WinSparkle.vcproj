@@ -40,9 +40,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/MP /D &quot;ZLIB_WINAPI&quot;"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
+				AdditionalIncludeDirectories="3rdparty\zlib125dll\include;include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_WIN_SPARKLE;XML_STATIC"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -64,9 +64,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
+				AdditionalDependencies=" zlibwapi.lib libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="3rdparty\zlib125dll\static32;3rdparty\zlib125dll\dll32;3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
+				AdditionalDependencies="zlibwapi.lib libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"

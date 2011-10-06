@@ -35,6 +35,7 @@ namespace winsparkle
 
 CriticalSection Settings::ms_csVars;
 std::string  Settings::ms_appcastURL;
+std::string	 Settings::ms_appId;
 std::string  Settings::ms_registryPath;
 std::wstring Settings::ms_companyName;
 std::wstring Settings::ms_appName;
