@@ -61,16 +61,43 @@ bool UpdateFile::DownloadZipFromFeedUrl()
 	StringDownloadSink downloadZip;
 	DownloadFile(m_zipFileUrl, &downloadZip, 1);
 
-	std::string baseUrl("http://localhost:47688/updates/win32/");
-	std::string downloadFilename = m_zipFileUrl.substr(baseUrl.length(), m_zipFileUrl.length() - baseUrl.length());
+	//extract filename, assume start with QVIVO
+	std::string downloadFilename = m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
-	FILE * pFile;
-	fopen_s ( &pFile, downloadFilename.c_str() , "wb" );
+	FILE * pFile = NULL;
+	fopen_s ( &pFile, downloadFilename.c_str() , "r+b" );
 
-	size_t size_write = fwrite(downloadZip.data.c_str(), 1, downloadZip.data.size(), pFile);
-	fclose(pFile);
+	if(pFile == NULL) // file not exists
+	{
+		fopen_s ( &pFile, downloadFilename.c_str() , "wb" );
+	}
 
-	return true;
+	if(pFile == NULL) // can't create file
+		return false;
+
+	// set the file pointer to end of file
+	fseek( pFile, 0, SEEK_END );
+
+	// get the file size
+	int size = ftell( pFile );
+
+	if(size == downloadZip.data.size()) // already downloaded before
+	{
+		fclose(pFile);
+
+		return true;
+	}
+
+	else 
+	{
+		// return the file pointer to begin of file if you want to read it
+		rewind( pFile );
+
+		size_t size_write = fwrite(downloadZip.data.c_str(), 1, downloadZip.data.size(), pFile);
+		fclose(pFile);
+
+		return true;
+	}
 }
 
 void UpdateFile::CloseAppFromFeedAppId()
@@ -112,23 +139,20 @@ std::wstring GetExecutablePath()
 	}
 }
 
-void UpdateFile::UpdateApp()
+bool UpdateFile::UnzipFile()
 {
 	int ret = 0;
 
-	std::string baseUrl("http://localhost:47688/updates/win32/");
-	std::string downloadFilename = m_zipFileUrl.substr(baseUrl.length(), m_zipFileUrl.length() - baseUrl.length());
+	//extract filename, assume start with QVIVO
+	std::string downloadFilename = m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
 	unzFile zip = unzOpen( downloadFilename.c_str() );
 
 	if ( zip == NULL ) 
 	{
 		printf("Error opening unzOpen\n");
-		return;
+		return false;
 	}
-
-	std::string exeuteFilename;
-
 
 	ret = unzGoToFirstFile(zip);
 
@@ -145,11 +169,41 @@ void UpdateFile::UpdateApp()
 		szName=(char *)malloc(FileInfo.size_filename+1); if (szName==NULL) continue;   
 		nRet=unzGetCurrentFileInfo(zip,&FileInfo,szName,FileInfo.size_filename+1,NULL,0,NULL,0);   
 
-		FILE * file;
-		fopen_s ( &file, szName , "wb" );
-
 		nRet=unzOpenCurrentFile(zip); 
-		if (nRet!=UNZ_OK) return;   
+		if (nRet!=UNZ_OK) return false;
+
+		std::string filename = szName;
+
+		if(filename.find(".exe") > 0) m_filename = filename;
+
+		FILE * file = NULL;
+		fopen_s ( &file, szName , "r+b" );
+
+		if(file == NULL) //file not exists
+		{
+			fopen_s ( &file, szName , "wb" );
+		}
+
+		if(file == NULL) //error create file
+			return false;
+
+		// set the file pointer to end of file
+		fseek( file, 0, SEEK_END );
+
+		// get the file size
+		int size = ftell( file );
+
+		if(size == FileInfo.uncompressed_size) // already extracted before
+		{
+			delete szName;
+			szName = NULL;
+
+			fclose(file);
+			ret = unzGoToNextFile(zip);
+			continue;
+		}
+
+		rewind( file );
 
 		unsigned int len = FileInfo.uncompressed_size;
 		char* buf = NULL;
@@ -162,8 +216,6 @@ void UpdateFile::UpdateApp()
 
 		ret = unzGoToNextFile(zip);
 
-		exeuteFilename = szName;
-
 		delete szName;
 		szName = NULL;
 
@@ -173,11 +225,16 @@ void UpdateFile::UpdateApp()
 
 	unzClose(zip);
 
-	int nLen = strlen(exeuteFilename.c_str()) + 1; 
-    int nwLen = MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, NULL, 0);
+	return true;
+}
+
+void UpdateFile::UpdateApp()
+{
+	int nLen = strlen(m_filename.c_str()) + 1; 
+    int nwLen = MultiByteToWideChar(CP_ACP, 0, m_filename.c_str(), nLen, NULL, 0);
 
 	TCHAR lpszFile[256]; 
-    MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, lpszFile, nwLen); 
+    MultiByteToWideChar(CP_ACP, 0, m_filename.c_str(), nLen, lpszFile, nwLen); 
 
 	TCHAR path[MAX_PATH] = {0};
 
@@ -197,6 +254,7 @@ void UpdateFile::Run()
     {
 		if(DownloadZipFromFeedUrl())
 		{
+			UnzipFile();
 			UpdateApp();
 			CloseAppFromFeedAppId();
 		}

@@ -58,8 +58,11 @@ private:
 
 	void UpdateApp();
 
+	bool UnzipFile();
+
 private:
-	std::string   m_zipFileUrl;
+	std::string		m_zipFileUrl;
+	std::string		m_filename;
 };
 
 } // namespace winsparkle
