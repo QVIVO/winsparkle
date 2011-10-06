@@ -37,6 +37,7 @@ CriticalSection Settings::ms_csVars;
 std::string  Settings::ms_appcastURL;
 std::string	 Settings::ms_appId;
 std::string  Settings::ms_registryPath;
+Appcast*	 Settings::mo_appcast;
 std::wstring Settings::ms_companyName;
 std::wstring Settings::ms_appName;
 std::wstring Settings::ms_appVersion;

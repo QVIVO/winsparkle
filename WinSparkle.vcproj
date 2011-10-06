@@ -22,6 +22,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
+			ManagedExtensions="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -45,11 +46,11 @@
 				AdditionalIncludeDirectories="3rdparty\zlib125dll\include;include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_WIN_SPARKLE;XML_STATIC"
 				MinimalRebuild="false"
-				BasicRuntimeChecks="3"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -67,7 +68,9 @@
 				AdditionalDependencies=" zlibwapi.lib libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="3rdparty\zlib125dll\static32;3rdparty\zlib125dll\dll32;3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
+				AssemblyDebug="1"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -219,6 +222,10 @@
 				RelativePath=".\src\updatechecker.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\updateFile.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -262,6 +269,10 @@
 				</File>
 				<File
 					RelativePath=".\src\updatechecker.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\updateFile.h"
 					>
 				</File>
 				<File

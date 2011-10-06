@@ -27,6 +27,7 @@
 #define _settings_h_
 
 #include "threads.h"
+#include "appcast.h"
 
 #include <string>
 #include <sstream>
@@ -51,6 +52,12 @@ public:
     /**
         Getting app metadata.
      */
+	static void CleanUp()
+	{
+		if(mo_appcast)
+			delete mo_appcast;
+		mo_appcast = NULL;
+	}
     //@{
 
     /// Get location of the appcast
@@ -107,6 +114,13 @@ public:
         return ms_registryPath;
     }
 
+    /// Return the Appcast
+    static Appcast* GetAppcast()
+    {
+        CriticalSectionLocker lock(ms_csVars);
+        return mo_appcast;
+    }
+
     //@}
 
     /**
@@ -150,6 +164,13 @@ public:
     {
         CriticalSectionLocker lock(ms_csVars);
         ms_registryPath = path;
+    }
+
+   /// Set Appcast
+    static void SetAppcast(Appcast *appcast)
+    {
+        CriticalSectionLocker lock(ms_csVars);
+        mo_appcast = appcast;
     }
     //@}
 
@@ -222,6 +243,7 @@ private:
     static std::string  ms_appcastURL;
 	static std::string	ms_appId;
     static std::string  ms_registryPath;
+	static Appcast*		mo_appcast;
     static std::wstring ms_companyName;
     static std::wstring ms_appName;
     static std::wstring ms_appVersion;

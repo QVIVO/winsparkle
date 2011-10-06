@@ -30,6 +30,7 @@
 #include "settings.h"
 #include "error.h"
 #include "updatechecker.h"
+#include "updateFile.h"
 
 #define wxNO_NET_LIB
 #define wxNO_XML_LIB
@@ -228,8 +229,6 @@ public:
     // change state into "a new version is available"
     void StateUpdateAvailable(const Appcast& info);
 	
-	void OnUpdateApp();
-
 private:
     void EnablePulsing(bool enable);
     void OnTimer(wxTimerEvent& event);
@@ -398,148 +397,6 @@ void UpdateDialog::OnRemindLater(wxCommandEvent&)
     Close();
 }
 
-bool UpdateDialog::DownloadZipFromFeedUrl()
-{
-	std::string baseUrl("http://localhost:47688/updates/win32/");
-
-	StringDownloadSink downloadZip;
-	DownloadFile(m_appcast.DownloadURL, &downloadZip, 1);
-
-	std::string downloadFilename = m_appcast.DownloadURL.substr(baseUrl.length(), m_appcast.DownloadURL.length() - baseUrl.length());
-
-	FILE * pFile;
-	fopen_s ( &pFile, downloadFilename.c_str() , "wb" );
-
-	size_t size_write = fwrite(downloadZip.data.c_str(), 1, downloadZip.data.size(), pFile);
-	fclose(pFile);
-
-	return true;
-}
-
-void UpdateDialog::CloseAppFromFeedAppId()
-{
-    const std::string appId = Settings::GetAppId();
-    
-	if ( appId.empty() )
-        throw std::runtime_error("App ID not specified.");
-
-	int nLen = strlen(appId.c_str()) + 1; 
-    int nwLen = MultiByteToWideChar(CP_ACP, 0, appId.c_str(), nLen, NULL, 0);
-
-	TCHAR lpszFile[256]; 
-    MultiByteToWideChar(CP_ACP, 0, appId.c_str(), nLen, lpszFile, nwLen); 
-
-	HWND qWin = ::FindWindow( lpszFile, 0);
-	UINT uMessage = WM_CLOSE;
-	WPARAM wParam = 0;
-	LPARAM lParam = 0;
-
-	SendMessage( qWin, uMessage, wParam, lParam );
-}
-
-std::wstring GetExecutablePath()
-{
-	static TCHAR buffer[MAX_PATH];
-	DWORD res = GetModuleFileName(NULL, buffer, MAX_PATH-1);
-
-	std::wstring str(buffer);
-	size_t pos = str.find_last_of('\\');
-
-	if (pos != std::string::npos)
-	{
-		return str.substr(0, pos);
-	}
-	else
-	{
-		return str;
-	}
-}
-
-void UpdateDialog::UpdateApp()
-{
-	int ret = 0;
-	std::string baseUrl("http://localhost:47688/updates/win32/");
-	std::string downloadFilename = m_appcast.DownloadURL.substr(baseUrl.length(), m_appcast.DownloadURL.length() - baseUrl.length());
-
-	unzFile zip = unzOpen( downloadFilename.c_str() );
-
-	if ( zip == NULL ) 
-	{
-		printf("Error opening unzOpen\n");
-		return;
-	}
-
-	std::string exeuteFilename;
-
-	ret = unzGoToFirstFile(zip);
-
-	while( ret == UNZ_OK )
-	{
-		unz_file_info FileInfo;   
-		char *szName=NULL;   
-		memset(&FileInfo,0,sizeof(FileInfo));   
-	   
-		int nRet=unzGetCurrentFileInfo(zip,&FileInfo,NULL,0,NULL,0,NULL,0); 
-		if (nRet!=UNZ_OK) continue;   
-	   
-		// Allocate space for the filename    
-		szName=(char *)malloc(FileInfo.size_filename+1); if (szName==NULL) continue;   
-		nRet=unzGetCurrentFileInfo(zip,&FileInfo,szName,FileInfo.size_filename+1,NULL,0,NULL,0);   
-
-		FILE * file;
-		fopen_s ( &file, szName , "wb" );
-
-		nRet=unzOpenCurrentFile(zip); 
-		if (nRet!=UNZ_OK) return;   
-
-		unsigned int len = FileInfo.uncompressed_size;
-		char* buf = NULL;
-		buf=(char *)malloc(len);
-
-		nRet=unzReadCurrentFile(zip, buf, len);   
-
-		fwrite(buf, 1, len, file);
-		fclose(file);
-
-		ret = unzGoToNextFile(zip);
-
-		exeuteFilename = szName;
-
-		delete szName;
-		szName = NULL;
-
-		delete buf;
-		buf = NULL;
-	}
-
-	unzClose(zip);
-
-	int nLen = strlen(exeuteFilename.c_str()) + 1; 
-    int nwLen = MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, NULL, 0);
-
-	TCHAR lpszFile[256]; 
-    MultiByteToWideChar(CP_ACP, 0, exeuteFilename.c_str(), nLen, lpszFile, nwLen); 
-
-	TCHAR path[MAX_PATH] = {0};
-
-	wsprintf(path, L"%s\\%s", GetExecutablePath().c_str(), lpszFile);
-	//wsprintf(path, L"%s\\QVIVO_2.0.31.exe", GetExecutablePath().c_str());
-
-	HANDLE handle = ShellExecute(NULL, _T("open"), path, NULL, NULL, SW_SHOWNORMAL);
-}
-
-void UpdateDialog::OnUpdateApp()
-{
-	if(DownloadZipFromFeedUrl())
-	{
-		CloseAppFromFeedAppId();
-
-		UpdateApp();
-
-		Close();
-	}
-}
-
 void UpdateDialog::OnInstall(wxCommandEvent&)
 {
     // FIXME: download the file within WinSparkle UI, stop the app,
@@ -549,6 +406,7 @@ void UpdateDialog::OnInstall(wxCommandEvent&)
 
 	UI::ShowCheckingUpdates();
 	UI::UpdateApp();
+	Close();
 }
 
 
@@ -974,8 +832,12 @@ void App::OnUpdateError(wxThreadEvent&)
 
 void App::OnUpdateApp(wxThreadEvent&)
 {
-    InitWindow();
-    m_win->OnUpdateApp();
+    //InitWindow();
+    //m_win->OnUpdateApp();
+	Appcast* appcast = Settings::GetAppcast();
+
+	UpdateFile* file = new UpdateFile(appcast->DownloadURL.c_str());
+	file->Start();
 }
 
 void App::OnUpdateAvailable(wxThreadEvent& event)
@@ -984,9 +846,11 @@ void App::OnUpdateAvailable(wxThreadEvent& event)
 
     Appcast *appcast = static_cast<Appcast*>(event.GetClientData());
 
+	Settings::SetAppcast(appcast);
+
     m_win->StateUpdateAvailable(*appcast);
 
-    delete appcast;
+    //delete appcast;
 
     ShowWindow();
 }
