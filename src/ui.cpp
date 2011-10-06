@@ -421,7 +421,7 @@ void UpdateDialog::StateCheckingUpdates()
 {
     LayoutChangesGuard guard(this);
 
-    SetMessage(_("Checking for updates..."));
+    SetMessage(_("Downloading updates..."));
 
     m_closeButton->SetLabel(_("Cancel"));
     EnablePulsing(true);
