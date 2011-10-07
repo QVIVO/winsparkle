@@ -46,6 +46,25 @@
 namespace winsparkle
 {
 
+
+std::wstring GetExecutablePath()
+{
+	static TCHAR buffer[MAX_PATH];
+	DWORD res = GetModuleFileName(NULL, buffer, MAX_PATH-1);
+
+	std::wstring str(buffer);
+	size_t pos = str.find_last_of('\\');
+
+	if (pos != std::string::npos)
+	{
+		return str.substr(0, pos);
+	}
+	else
+	{
+		return str;
+	}
+}
+
 /*--------------------------------------------------------------------------*
                              UpdateChecker::Run()
  *--------------------------------------------------------------------------*/
@@ -61,8 +80,13 @@ bool UpdateFile::DownloadZipFromFeedUrl()
 	StringDownloadSink downloadZip;
 	DownloadFile(m_zipFileUrl, &downloadZip, 1);
 
+	std::wstring updatePath = GetExecutablePath();
+	updatePath.append(L"\\updates");
+
+	int ret = CreateDirectory(updatePath.c_str(), NULL);
+
 	//extract filename, assume start with QVIVO
-	std::string downloadFilename = m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
+	std::string downloadFilename = "updates\\" + m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
 	FILE * pFile = NULL;
 	fopen_s ( &pFile, downloadFilename.c_str() , "r+b" );
@@ -121,30 +145,12 @@ void UpdateFile::CloseAppFromFeedAppId()
 	SendMessage( qWin, uMessage, wParam, lParam );
 }
 
-std::wstring GetExecutablePath()
-{
-	static TCHAR buffer[MAX_PATH];
-	DWORD res = GetModuleFileName(NULL, buffer, MAX_PATH-1);
-
-	std::wstring str(buffer);
-	size_t pos = str.find_last_of('\\');
-
-	if (pos != std::string::npos)
-	{
-		return str.substr(0, pos);
-	}
-	else
-	{
-		return str;
-	}
-}
-
 bool UpdateFile::UnzipFile()
 {
 	int ret = 0;
 
 	//extract filename, assume start with QVIVO
-	std::string downloadFilename = m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
+	std::string downloadFilename = "updates\\" + m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
 	unzFile zip = unzOpen( downloadFilename.c_str() );
 
@@ -172,16 +178,17 @@ bool UpdateFile::UnzipFile()
 		nRet=unzOpenCurrentFile(zip); 
 		if (nRet!=UNZ_OK) return false;
 
-		std::string filename = szName;
+		std::string filename = "updates\\";
+		filename.append(szName);
 
 		if(filename.find(".exe") > 0) m_filename = filename;
 
 		FILE * file = NULL;
-		fopen_s ( &file, szName , "r+b" );
+		fopen_s ( &file, filename.c_str() , "r+b" );
 
 		if(file == NULL) //file not exists
 		{
-			fopen_s ( &file, szName , "wb" );
+			fopen_s ( &file, filename.c_str() , "wb" );
 		}
 
 		if(file == NULL) //error create file
@@ -257,6 +264,10 @@ void UpdateFile::Run()
 			UnzipFile();
 			UpdateApp();
 			CloseAppFromFeedAppId();
+		}
+		else
+		{
+			UI::NotifyUpdateError();
 		}
     }
     catch ( ... )
