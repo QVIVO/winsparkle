@@ -1,10 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "wxWidgets\build\msw\wx_vc9_base.vcproj", "{3FCC50C2-81E9-5DB2-B8D8-2129427568B1}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "wxWidgets\build\msw\wx_vc9_base.vcxproj", "{3FCC50C2-81E9-5DB2-B8D8-2129427568B1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "wxWidgets\build\msw\wx_vc9_core.vcproj", "{6744DAD8-9C70-574A-BFF2-9F8DDDB24A75}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "wxWidgets\build\msw\wx_vc9_core.vcxproj", "{6744DAD8-9C70-574A-BFF2-9F8DDDB24A75}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat_static", "expat\lib\expat_static.vcproj", "{3A87DE4C-3F52-4048-B12F-25E7709C3940}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat_static", "expat\lib\expat_static.vcxproj", "{3A87DE4C-3F52-4048-B12F-25E7709C3940}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
