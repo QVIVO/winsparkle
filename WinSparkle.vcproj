@@ -22,7 +22,6 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,16 +40,16 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /D &quot;ZLIB_WINAPI&quot;"
+				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="3rdparty\zlib125dll\include;include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
+				AdditionalIncludeDirectories="include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_WIN_SPARKLE;XML_STATIC"
 				MinimalRebuild="false"
-				BasicRuntimeChecks="0"
+				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -65,12 +64,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=" zlibwapi.lib libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
+				AdditionalDependencies="libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="3rdparty\zlib125dll\static32;3rdparty\zlib125dll\dll32;3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
-				IgnoreDefaultLibraryNames=""
+				AdditionalLibraryDirectories="3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
-				AssemblyDebug="1"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -121,11 +118,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /D &quot;ZLIB_WINAPI&quot;"
+				AdditionalOptions="/MP"
 				Optimization="1"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="2"
-				AdditionalIncludeDirectories="3rdparty\zlib125dll\include;include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
+				AdditionalIncludeDirectories="include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BUILDING_WIN_SPARKLE;XML_STATIC"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -146,9 +143,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlibwapi.lib  libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
+				AdditionalDependencies="libexpatMT.lib comctl32.lib rpcrt4.lib wininet.lib version.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="3rdparty\zlib125dll\dll32;3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="3rdparty\wxWidgets\lib\vc_lib;&quot;3rdparty\expat\win32\bin\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -222,10 +219,6 @@
 				RelativePath=".\src\updatechecker.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\src\updateFile.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -269,10 +262,6 @@
 				</File>
 				<File
 					RelativePath=".\src\updatechecker.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\updateFile.h"
 					>
 				</File>
 				<File
