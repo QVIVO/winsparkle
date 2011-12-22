@@ -46,7 +46,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MP /D"BOOST_FILESYSTEM_VERSION=2" %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;3rdparty\minizip\include;3rdparty\wxWidgets\include\msvc;3rdparty\wxWidgets\include;3rdparty\expat\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ZLIB_WINAPI;WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDING_WIN_SPARKLE;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>

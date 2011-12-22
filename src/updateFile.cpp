@@ -65,6 +65,28 @@ std::wstring GetExecutablePath()
 	}
 }
 
+std::string GetAppDataPath()
+{
+	std::string appDataPath;
+
+	char *path = NULL;
+	path = getenv("APPDATA");
+
+	if (path != NULL)
+	{
+		appDataPath = path;
+
+		appDataPath += "\\QVIVO\\Update";
+	}
+	else
+	{
+		DWORD len;
+		GetTempPathA(len, path);
+		appDataPath = path;
+	}
+	return appDataPath;
+}
+
 /*--------------------------------------------------------------------------*
                              UpdateChecker::Run()
  *--------------------------------------------------------------------------*/
@@ -80,13 +102,14 @@ bool UpdateFile::DownloadZipFromFeedUrl()
 	StringDownloadSink downloadZip;
 	DownloadFile(m_zipFileUrl, &downloadZip, 1);
 
-	std::wstring updatePath = GetExecutablePath();
-	updatePath.append(L"\\updates");
+	std::string updatePath = GetAppDataPath();
 
-	int ret = CreateDirectory(updatePath.c_str(), NULL);
+	int ret = CreateDirectoryA(updatePath.c_str(), NULL);
 
 	//extract filename, assume start with QVIVO
-	std::string downloadFilename = "updates\\" + m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
+	Appcast* appcast = Settings::GetAppcast();
+
+	std::string downloadFilename = updatePath + "\\" + appcast->updateFileName;//m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
 	FILE * pFile = NULL;
 	fopen_s ( &pFile, downloadFilename.c_str() , "r+b" );
@@ -150,7 +173,11 @@ bool UpdateFile::UnzipFile()
 	int ret = 0;
 
 	//extract filename, assume start with QVIVO
-	std::string downloadFilename = "updates\\" + m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
+	Appcast* appcast = Settings::GetAppcast();
+
+	std::string updatePath = GetAppDataPath();
+
+	std::string downloadFilename = updatePath + "\\" + appcast->updateFileName;//m_zipFileUrl.substr(m_zipFileUrl.find("QVIVO"));
 
 	unzFile zip = unzOpen( downloadFilename.c_str() );
 
@@ -178,7 +205,7 @@ bool UpdateFile::UnzipFile()
 		nRet=unzOpenCurrentFile(zip); 
 		if (nRet!=UNZ_OK) return false;
 
-		std::string filename = "updates\\";
+		std::string filename = updatePath + "\\";
 		filename.append(szName);
 
 		if(filename.find(".exe") > 0) m_filename = filename;
@@ -243,12 +270,12 @@ void UpdateFile::UpdateApp()
 	TCHAR lpszFile[256]; 
     MultiByteToWideChar(CP_ACP, 0, m_filename.c_str(), nLen, lpszFile, nwLen); 
 
-	TCHAR path[MAX_PATH] = {0};
+	//TCHAR path[MAX_PATH] = {0};
 
-	wsprintf(path, L"%s\\%s", GetExecutablePath().c_str(), lpszFile);
+	//wsprintf(path, L"%s\\%s", GetExecutablePath().c_str(), lpszFile);
 	//wsprintf(path, L"%s\\QVIVO_2.0.31.exe", GetExecutablePath().c_str());
 
-	ShellExecute(NULL, _T("open"), path, NULL, NULL, SW_SHOWNORMAL);
+	ShellExecute(NULL, _T("open"), lpszFile, NULL, NULL, SW_SHOWNORMAL);
 }
 
 void UpdateFile::Run()

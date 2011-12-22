@@ -51,6 +51,15 @@ struct Appcast
     /// Description of the update
     std::string Description;
 
+	/// URL of the update
+	std::string SparkleURL;
+
+	/// App build number
+	std::string Build;
+
+	/// Filename of the update
+	std::string updateFileName;
+
     /**
         Initializes the struct with data from XML appcast feed.
 

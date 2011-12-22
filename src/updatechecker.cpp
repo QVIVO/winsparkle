@@ -240,8 +240,10 @@ void UpdateChecker::Run()
         const std::string currentVersion =
                 WideToAnsi(Settings::GetAppVersion());
 
+		std::string currentBuild = currentVersion.substr(currentVersion.find(":") + 1);
+		std::string appcastBuild = appcast.Build.substr(appcast.Build.find(":") + 1);
         // Check if our version is out of date.
-        if ( CompareVersions(currentVersion, appcast.Version) >= 0 )
+        if ( CompareVersions(currentBuild, appcastBuild) >= 0 )
         {
             // The same or newer version is already installed.
             //UI::NotifyNoUpdates();
