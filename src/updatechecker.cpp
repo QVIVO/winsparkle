@@ -242,6 +242,18 @@ void UpdateChecker::Run()
 
 		std::string currentBuild = currentVersion.substr(currentVersion.find(":") + 1);
 		std::string appcastBuild = appcast.Build.substr(appcast.Build.find(":") + 1);
+
+		std::string currentProductionVersion = currentVersion.substr(0, currentVersion.find(","));
+		std::string appcastProductionVersion = appcast.Build.substr(0, appcast.Build.find(","));
+
+        // Check if our version is out of date.
+        if ( CompareVersions(currentProductionVersion, appcastProductionVersion) >= 0 )
+        {
+            // The same or newer version is already installed.
+            //UI::NotifyNoUpdates();
+            return;
+        }
+
         // Check if our version is out of date.
         if ( CompareVersions(currentBuild, appcastBuild) >= 0 )
         {

@@ -54,7 +54,7 @@
 #include <exdisp.h>
 #include <mshtml.h>
 
-#include "unzip.h"
+//#include "unzip.h"
 #include "download.h"
 
 #if !wxCHECK_VERSION(2,9,0)
@@ -513,7 +513,7 @@ void UpdateDialog::StateUpdateAvailable(const Appcast& info)
             (
                 _("%s %s is now available (you have %s). Would you like to download it now?"),
                 appname,
-                info.Version,
+                info.Build,
                 Settings::GetAppVersion()
             ),
             showRelnotes ? RELNOTES_WIDTH : MESSAGE_AREA_WIDTH
