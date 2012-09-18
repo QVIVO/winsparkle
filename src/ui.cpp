@@ -439,14 +439,14 @@ void UpdateDialog::StateNoUpdateFound()
 {
     LayoutChangesGuard guard(this);
 
-    m_heading->SetLabel(_("You're up to date!"));
+    m_heading->SetLabel(_("QVIVO is up to date!"));
 
     wxString msg;
     try
     {
         msg = wxString::Format
               (
-                  _("%s %s is currently the newest version available."),
+                  _("%s %s"),
                   Settings::GetAppName(),
                   Settings::GetAppVersion()
               );

@@ -161,7 +161,13 @@ void XMLCALL OnText(void *data, const char *s, int len)
     ContextData& ctxt = *static_cast<ContextData*>(data);
 
     if ( ctxt.in_relnotes )
+	{
+#ifdef _DEBUG
+        ctxt.appcast.ReleaseNotesURL = "https://s3.amazonaws.com/qvivo_releases/v2/win32/testing/QVIVO_ReleaseNotes.html";
+#else
         ctxt.appcast.ReleaseNotesURL.append(s, len);
+#endif
+	}
     else if ( ctxt.in_title )
         ctxt.appcast.Title.append(s, len);
     else if ( ctxt.in_description )

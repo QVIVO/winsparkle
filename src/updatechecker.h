@@ -44,6 +44,7 @@ class UpdateChecker : public Thread
 public:
     /// Creates checker thread.
     UpdateChecker();
+    UpdateChecker(bool showUI);
 
     /**
         Compares versions @a a and @a b.
@@ -64,6 +65,8 @@ protected:
 protected:
     virtual void Run();
     virtual bool IsJoinable() const { return false; }
+
+	bool m_showUI;
 };
 
 
@@ -75,6 +78,7 @@ class ManualUpdateChecker : public UpdateChecker
 public:
     /// Creates checker thread.
     ManualUpdateChecker() : UpdateChecker() {}
+    ManualUpdateChecker(bool showUI) : UpdateChecker(showUI) {}
 
 protected:
     virtual int GetAppcastDownloadFlags() const;
