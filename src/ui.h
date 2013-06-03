@@ -71,6 +71,8 @@ public:
      */
     static void NotifyUpdateError();
 
+	static void UpdateApp();
+
     /**
         Notifies the UI that a new version is available.
 

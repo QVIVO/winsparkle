@@ -1,19 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinSparkle", "WinSparkle.vcproj", "{524CCCF2-61EA-5B64-A1D9-FF5497027B5F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8D88AE38-FF38-5A85-83D1-BB6816ED2F58} = {8D88AE38-FF38-5A85-83D1-BB6816ED2F58}
-		{8219BFF9-5C5B-5938-8CB9-EB3EFCE84617} = {8219BFF9-5C5B-5938-8CB9-EB3EFCE84617}
-	EndProjectSection
+
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinSparkle", "WinSparkle.vcxproj", "{F00FBD5D-F9FD-40A0-BCCE-1D619ADCA5A3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat", "3rdparty\expat.vcproj", "{8D88AE38-FF38-5A85-83D1-BB6816ED2F58}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wx", "3rdparty\wx.vcproj", "{8219BFF9-5C5B-5938-8CB9-EB3EFCE84617}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_psdk", "examples\example_psdk.vcproj", "{AFBD6C55-82AB-5746-BABD-D254BE893418}"
-	ProjectSection(ProjectDependencies) = postProject
-		{524CCCF2-61EA-5B64-A1D9-FF5497027B5F} = {524CCCF2-61EA-5B64-A1D9-FF5497027B5F}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_psdk", "examples\psdk\example_psdk.vcxproj", "{1C6A0960-D5A1-4A8F-854D-8CFA999C5A25}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{A08C2BE9-77DB-5624-AEE8-8C413C52E066}"
 EndProject

@@ -213,7 +213,15 @@ int UpdateChecker::CompareVersions(const string& verA, const string& verB)
                              UpdateChecker::Run()
  *--------------------------------------------------------------------------*/
 
-UpdateChecker::UpdateChecker(): Thread("WinSparkle updates check")
+UpdateChecker::UpdateChecker()
+	: Thread("WinSparkle updates check")
+	, m_showUI(true)
+{
+}
+
+UpdateChecker::UpdateChecker(bool showUI)
+	: Thread("WinSparkle updates check")
+	, m_showUI(showUI)
 {
 }
 
@@ -225,7 +233,11 @@ void UpdateChecker::Run()
 
     try
     {
+#ifdef _DEBUG
+		const std::string url = "https://s3.amazonaws.com/qvivo_releases/v2/win32/testing/appcast.xml";
+#else
         const std::string url = Settings::GetAppcastURL();
+#endif
         if ( url.empty() )
             throw std::runtime_error("Appcast URL not specified.");
 
@@ -240,18 +252,27 @@ void UpdateChecker::Run()
         const std::string currentVersion =
                 WideToAnsi(Settings::GetAppVersion());
 
+		std::string currentBuild = currentVersion.substr(currentVersion.find(":") + 1);
+		std::string appcastBuild = appcast.Build.substr(appcast.Build.find(":") + 1);
+
+		std::string currentProductionVersion = currentVersion.substr(0, currentVersion.find(","));
+		std::string appcastProductionVersion = appcast.Build.substr(0, appcast.Build.find(","));
+
         // Check if our version is out of date.
-        if ( CompareVersions(currentVersion, appcast.Version) >= 0 )
+        if ( CompareVersions(currentProductionVersion, appcastProductionVersion) >= 0 )
         {
             // The same or newer version is already installed.
-            UI::NotifyNoUpdates();
+
+			if(m_showUI)
+				UI::NotifyNoUpdates();
             return;
         }
 
         // Check if the user opted to ignore this particular version.
         if ( ShouldSkipUpdate(appcast) )
         {
-            UI::NotifyNoUpdates();
+			if(m_showUI)
+				UI::NotifyNoUpdates();
             return;
         }
 

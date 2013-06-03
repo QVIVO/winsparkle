@@ -53,6 +53,9 @@ namespace
 #define NODE_ENCLOSURE  "enclosure"
 #define ATTR_URL        "url"
 #define ATTR_VERSION    NS_SPARKLE_NAME("version")
+#define ATTR_BUILD      NS_SPARKLE_NAME("build")
+#define ATTR_SPARKLE_URL    NS_SPARKLE_NAME("url")
+#define ATTR_UPDATE_FILENAME    NS_SPARKLE_NAME("update")
 
 
 // context data for the parser
@@ -112,6 +115,12 @@ void XMLCALL OnStartElement(void *data, const char *name, const char **attrs)
                     ctxt.appcast.DownloadURL = value;
                 else if ( strcmp(name, ATTR_VERSION) == 0 )
                     ctxt.appcast.Version = value;
+                else if ( strcmp(name, ATTR_BUILD) == 0 )
+                    ctxt.appcast.Build = value;
+                else if ( strcmp(name, ATTR_SPARKLE_URL) == 0 )
+                    ctxt.appcast.SparkleURL = value;
+                else if ( strcmp(name, ATTR_UPDATE_FILENAME) == 0 )
+                    ctxt.appcast.updateFileName = value;
             }
         }
     }
@@ -152,7 +161,13 @@ void XMLCALL OnText(void *data, const char *s, int len)
     ContextData& ctxt = *static_cast<ContextData*>(data);
 
     if ( ctxt.in_relnotes )
+	{
+#ifdef _DEBUG
+        ctxt.appcast.ReleaseNotesURL = "https://s3.amazonaws.com/qvivo_releases/v2/win32/testing/QVIVO_ReleaseNotes.html";
+#else
         ctxt.appcast.ReleaseNotesURL.append(s, len);
+#endif
+	}
     else if ( ctxt.in_title )
         ctxt.appcast.Title.append(s, len);
     else if ( ctxt.in_description )
