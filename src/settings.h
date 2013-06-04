@@ -98,6 +98,15 @@ public:
         return ms_registryPath;
     }
 
+    /// Return the download path 
+    static std::wstring GetDownloadPath()
+    {
+        CriticalSectionLocker lock(ms_csVars);
+        if ( ms_downloadPath.empty() )
+            ms_downloadPath = GetDefaultDownloadPath();
+        return ms_downloadPath;
+    }
+
     //@}
 
     /**
@@ -142,6 +151,15 @@ public:
         CriticalSectionLocker lock(ms_csVars);
         ms_registryPath = path;
     }
+
+    /// Set Windows download path to store updates in
+    static void SetDownloadPath(const wchar_t *path)
+    {
+        CriticalSectionLocker lock(ms_csVars);
+        ms_downloadPath = path;
+    }
+
+	
     //@}
 
 
@@ -205,6 +223,7 @@ private:
     static std::string GetCustomResource(const char *name, const char *type);
 
     static std::string GetDefaultRegistryPath();
+    static std::wstring GetDefaultDownloadPath();
 
     static void DoWriteConfigValue(const char *name, const char *value);
     static std::string DoReadConfigValue(const char *name);
@@ -215,6 +234,7 @@ private:
 
     static std::string  ms_appcastURL;
     static std::string  ms_registryPath;
+	static std::wstring ms_downloadPath;
     static std::wstring ms_companyName;
     static std::wstring ms_appName;
     static std::wstring ms_appVersion;

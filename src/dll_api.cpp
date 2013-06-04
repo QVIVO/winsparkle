@@ -140,6 +140,15 @@ WIN_SPARKLE_API void __cdecl win_sparkle_set_registry_path(const char *path)
     CATCH_ALL_EXCEPTIONS
 }
 
+WIN_SPARKLE_API void __cdecl win_sparkle_set_download_path(const wchar_t *path)
+{
+	try
+	{
+		Settings::SetDownloadPath(path);
+	}
+	CATCH_ALL_EXCEPTIONS
+}
+
 WIN_SPARKLE_API void __cdecl win_sparkle_set_automatic_check_for_updates(int state)
 {
     try

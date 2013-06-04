@@ -28,12 +28,17 @@
 #include "settings.h"
 #include "ui.h"
 #include "error.h"
+#include "utils.h"
 
 #include <wx/string.h>
 
 #include <sstream>
 #include <rpc.h>
 #include <time.h>
+#include <Shellapi.h>
+
+#include <string>
+
 
 namespace winsparkle
 {
@@ -45,38 +50,6 @@ namespace winsparkle
 namespace
 {
 
-std::string CreateUniqueTempDirectory()
-{
-    // We need to put downloaded updates into a directory of their own, because
-    // if we put it in $TMP, some DLLs could be there and interfere with the
-    // installer.
-    //
-    // This code creates a new randomized directory name and tries to create it;
-    // this process is repeated if the directory already exists.
-    char tmpdir[MAX_PATH+1];
-    if ( GetTempPathA(sizeof(tmpdir), tmpdir) == 0 )
-        throw Win32Exception("Cannot create temporary directory");
-
-    for ( ;; )
-    {
-        std::ostringstream sdir;
-        sdir << tmpdir << "Update-";
-
-        UUID uuid;
-        UuidCreate(&uuid);
-        RPC_CSTR uuidStr;
-        UuidToStringA(&uuid, &uuidStr);
-        sdir << uuidStr;
-        RpcStringFreeA(&uuidStr);
-
-        const std::string dir(sdir.str());
-
-        if ( CreateDirectoryA(dir.c_str(), NULL) )
-            return dir;
-        else if ( GetLastError() != ERROR_ALREADY_EXISTS )
-            throw Win32Exception("Cannot create temporary directory");
-    }
-}
 
 struct UpdateDownloadSink : public IDownloadSink
 {
@@ -151,14 +124,14 @@ void UpdateDownloader::Run()
 
     try
     {
-      const std::string tmpdir = CreateUniqueTempDirectory();
-      Settings::WriteConfigValue("UpdateTempDir", tmpdir);
+		std::wstring updateDir = Settings::GetDownloadPath().c_str();
+		Settings::WriteConfigValue("DownloadDir", updateDir.c_str());
 
-      std::string filename = tmpdir + "\\" + GetURLFileName(m_appcast.DownloadURL);
-      UpdateDownloadSink sink(*this, filename);
-      DownloadFile(m_appcast.DownloadURL, &sink);
-      sink.Close();
-      UI::NotifyUpdateDownloaded(filename);
+		std::string filename = ConvertWideCharToMultiByte(updateDir.c_str()) + "\\" + GetURLFileName(m_appcast.DownloadURL);
+		UpdateDownloadSink sink(*this, filename);
+		DownloadFile(m_appcast.DownloadURL, &sink);
+		sink.Close();
+		UI::NotifyUpdateDownloaded(filename);
     }
     catch ( ... )
     {
@@ -177,7 +150,7 @@ void UpdateDownloader::CleanLeftovers()
     // Note: this is called at startup. Do not use wxWidgets from this code!
 
     std::string tmpdir;
-    if ( !Settings::ReadConfigValue("UpdateTempDir", tmpdir) )
+    if ( !Settings::ReadConfigValue("DownloadDir", tmpdir) )
         return;
 
     tmpdir.append(1, '\0'); // double NULL-terminate for SHFileOperation
@@ -192,7 +165,7 @@ void UpdateDownloader::CleanLeftovers()
 
     if ( SHFileOperationA(&fos) == 0 )
     {
-        Settings::DeleteConfigValue("UpdateTempDir");
+        Settings::DeleteConfigValue("DownloadDir");
     }
     // else: try another time, this is just a "soft" error
 }

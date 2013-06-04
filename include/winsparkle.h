@@ -219,8 +219,15 @@ WIN_SPARKLE_API int __cdecl win_sparkle_get_update_check_interval();
  */
 WIN_SPARKLE_API void __cdecl win_sparkle_check_update_with_ui();
 
+///
+/// QVIVO specific API
+///
+
 /// same as above but no UI displayed
 WIN_SPARKLE_API void __cdecl win_sparkle_check_update_silent();
+
+/// setting the download path for an app
+WIN_SPARKLE_API void __cdecl win_sparkle_set_download_path(const wchar_t *path);
 
 //@}
 

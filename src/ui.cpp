@@ -24,7 +24,7 @@
  */
 
 // silence warnings in wxWidgets' CRT wrappers
-#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
 
 #include "ui.h"
 #include "settings.h"

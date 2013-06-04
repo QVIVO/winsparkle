@@ -49,28 +49,33 @@ struct DataBuffer
 
 // Simple conversion between wide and narrow strings (only safe for ASCII!):
 
-template<typename TIn, typename TOut>
-inline std::basic_string<TOut> ConvertString(const std::basic_string<TIn>& s)
-{
-    std::basic_string<TOut> out;
-    out.reserve(s.length());
+//template<typename TIn, typename TOut>
+//inline std::basic_string<TOut> ConvertString(const std::basic_string<TIn>& s)
+//{
+//    std::basic_string<TOut> out;
+//    out.reserve(s.length());
+//
+//    for ( std::basic_string<TIn>::const_iterator i = s.begin(); i != s.end(); ++i )
+//    {
+//        out += static_cast<TOut>(*i);
+//    }
+//
+//    return out;
+//}
 
-    for ( std::basic_string<TIn>::const_iterator i = s.begin(); i != s.end(); ++i )
-    {
-        out += static_cast<TOut>(*i);
-    }
-
-    return out;
-}
+std::string ConvertWideCharToMultiByte(const wchar_t* wstr);
+std::wstring ConvertMultiByteToWideChar(const std::string& str);
 
 inline std::string WideToAnsi(const std::wstring& s)
 {
-    return ConvertString<wchar_t, char>(s);
+    //return ConvertString<wchar_t, char>(s);
+	return ConvertWideCharToMultiByte(s.c_str());
 }
 
 inline std::wstring AnsiToWide(const std::string& s)
 {
-    return ConvertString<char, wchar_t>(s);
+    //return ConvertString<char, wchar_t>(s);
+	return ConvertMultiByteToWideChar(s.c_str());
 }
 
 

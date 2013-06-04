@@ -29,6 +29,8 @@
 #include "utils.h"
 #include "threads.h"
 
+#include <rpc.h>
+
 
 namespace winsparkle
 {
@@ -36,6 +38,7 @@ namespace winsparkle
 CriticalSection Settings::ms_csVars;
 std::string  Settings::ms_appcastURL;
 std::string  Settings::ms_registryPath;
+std::wstring Settings::ms_downloadPath;
 std::wstring Settings::ms_companyName;
 std::wstring Settings::ms_appName;
 std::wstring Settings::ms_appVersion;
@@ -47,6 +50,40 @@ std::wstring Settings::ms_appVersion;
 
 namespace
 {
+
+
+std::string CreateUniqueTempDirectory()
+{
+    // We need to put downloaded updates into a directory of their own, because
+    // if we put it in $TMP, some DLLs could be there and interfere with the
+    // installer.
+    //
+    // This code creates a new randomized directory name and tries to create it;
+    // this process is repeated if the directory already exists.
+    char tmpdir[MAX_PATH+1];
+    if ( GetTempPathA(sizeof(tmpdir), tmpdir) == 0 )
+        throw Win32Exception("Cannot create temporary directory");
+
+    for ( ;; )
+    {
+        std::ostringstream sdir;
+        sdir << tmpdir << "Update-";
+
+        UUID uuid;
+        UuidCreate(&uuid);
+        RPC_CSTR uuidStr;
+        UuidToStringA(&uuid, &uuidStr);
+        sdir << uuidStr;
+        RpcStringFreeA(&uuidStr);
+
+        const std::string dir(sdir.str());
+
+        if ( CreateDirectoryA(dir.c_str(), NULL) )
+            return dir;
+        else if ( GetLastError() != ERROR_ALREADY_EXISTS )
+            throw Win32Exception("Cannot create temporary directory");
+    }
+}
 
 struct TranslationInfo
 {
@@ -172,6 +209,11 @@ std::string Settings::GetDefaultRegistryPath()
     s += "\\WinSparkle";
 
     return s;
+}
+
+std::wstring Settings::GetDefaultDownloadPath()
+{
+	return ConvertMultiByteToWideChar(CreateUniqueTempDirectory());
 }
 
 namespace
