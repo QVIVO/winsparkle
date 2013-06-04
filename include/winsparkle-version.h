@@ -32,21 +32,21 @@
 
 #define WIN_SPARKLE_VERSION_MAJOR   0
 #define WIN_SPARKLE_VERSION_MINOR   3
-#define WIN_SPARKLE_VERSION_MICRO   0
+#define WIN_SPARKLE_VERSION_MICRO   1
 
 /**
     Checks if WinSparkle version is at least @a major.@a minor.@a micro.
  */
 #define WIN_SPARKLE_CHECK_VERSION(major, minor, micro)           \
         (                                                        \
-            WIN_SPARKLE_VERSION_MAJOR > (major)                  \
+            (WIN_SPARKLE_VERSION_MAJOR > (major))                \
             ||                                                   \
-            (WIN_SPARKLE_VERSION_MAJOR == (major) &&             \
-             WIN_SPARKLE_VERSION_MINOR >= (minor))               \
+            ((WIN_SPARKLE_VERSION_MAJOR == (major)) &&           \
+             (WIN_SPARKLE_VERSION_MINOR >= (minor)))             \
             ||                                                   \
-            (WIN_SPARKLE_VERSION_MAJOR == (major) &&             \
-            (WIN_SPARKLE_VERSION_MINOR == (minor) &&             \
-             WIN_SPARKLE_VERSION_MICRO >= (micro))               \
+            ((WIN_SPARKLE_VERSION_MAJOR == (major)) &&           \
+             (WIN_SPARKLE_VERSION_MINOR == (minor)) &&           \
+             (WIN_SPARKLE_VERSION_MICRO >= (micro)))             \
         )
 
 #define _WIN_SPARKLE_MAKE_STR(x) #x

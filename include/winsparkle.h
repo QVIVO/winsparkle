@@ -219,6 +219,9 @@ WIN_SPARKLE_API int __cdecl win_sparkle_get_update_check_interval();
  */
 WIN_SPARKLE_API void __cdecl win_sparkle_check_update_with_ui();
 
+/// same as above but no UI displayed
+WIN_SPARKLE_API void __cdecl win_sparkle_check_update_silent();
+
 //@}
 
 #ifdef __cplusplus
