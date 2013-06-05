@@ -85,7 +85,10 @@ WIN_SPARKLE_API void __cdecl win_sparkle_init()
             {
                 // Only when the app is launched for the second time, ask the
                 // user for their permission to check for updates.
-                UI::AskForPermission();
+                //UI::AskForPermission();
+
+				// QVIVO doesn't display the AskForPermission dialog, instead always checks anyway
+				Settings::WriteConfigValue("CheckForUpdates", true);
             }
         }
     }
