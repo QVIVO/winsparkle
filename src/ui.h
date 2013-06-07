@@ -32,6 +32,8 @@
 namespace winsparkle
 {
 
+	
+
 /**
     The main UI thread.
 
@@ -45,6 +47,12 @@ namespace winsparkle
 class UI : public Thread
 {
 public:
+	typedef void (*CBFunc)( int );
+
+	static void SetCallback( CBFunc func);
+
+	static void TriggerCallback( int cbType );
+
     /**
         Shuts the UI thread down.
 
@@ -112,7 +120,8 @@ protected:
 private:
     UI();
 
-    static HINSTANCE ms_hInstance;
+    static HINSTANCE	ms_hInstance;
+	static CBFunc		ms_callback;
 
     friend class UIThreadAccess;
 };

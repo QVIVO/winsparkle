@@ -31,6 +31,7 @@
 #include "error.h"
 #include "updatechecker.h"
 #include "updatedownloader.h"
+#include "winsparkle.h"
 
 #define wxNO_NET_LIB
 #define wxNO_XML_LIB
@@ -500,6 +501,10 @@ void UpdateDialog::OnRunInstaller(wxCommandEvent&)
         wxLogError(_("Failed to launch the installer."));
         wxLog::FlushActive();
     }
+	else
+	{
+		UI::TriggerCallback(Callback_StartInstall);
+	}
 
     Close();
 }
@@ -1118,7 +1123,7 @@ CriticalSection UIThreadAccess::ms_uiThreadCS;
 
 
 HINSTANCE UI::ms_hInstance = NULL;
-
+UI::CBFunc UI::ms_callback = 0;
 
 UI::UI() : Thread("WinSparkle UI thread")
 {
@@ -1166,6 +1171,16 @@ void UI::ShutDown()
     uit.ShutDownThread();
 }
 
+void UI::SetCallback( CBFunc func)
+{
+	ms_callback = func;
+}
+
+void UI::TriggerCallback( int cbType )
+{
+	if( ms_callback )
+		ms_callback(cbType);
+}
 
 /*static*/
 void UI::NotifyNoUpdates()

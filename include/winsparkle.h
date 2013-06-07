@@ -229,6 +229,17 @@ WIN_SPARKLE_API void __cdecl win_sparkle_check_update_silent();
 /// setting the download path for an app
 WIN_SPARKLE_API void __cdecl win_sparkle_set_download_path(const wchar_t *path);
 
+enum ECallbackType
+{
+	Callback_Invalid = 0,
+	Callback_StartInstall,			// called when about to install (ie app could for example shut down)
+};
+
+typedef void (*CallbackFunction)( int );
+
+WIN_SPARKLE_API void __cdecl win_sparkle_set_callback( CallbackFunction func );
+
+
 //@}
 
 #ifdef __cplusplus

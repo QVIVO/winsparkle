@@ -236,4 +236,9 @@ WIN_SPARKLE_API void __cdecl win_sparkle_check_update_silent()
     CATCH_ALL_EXCEPTIONS
 }
 
+WIN_SPARKLE_API void __cdecl win_sparkle_set_callback( CallbackFunction func )
+{
+	UI::SetCallback(func);
+}
+
 } // extern "C"
